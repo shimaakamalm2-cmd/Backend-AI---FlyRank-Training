@@ -14,6 +14,10 @@ class Task(BaseModel):
 class TaskCreate(BaseModel):
     title: str
 
+class TaskUpdate(BaseModel):
+    title: str
+    done: bool
+
 
 # in memory or hardcode examples and outside of the class
 tasks: list[Task] = [
@@ -47,3 +51,17 @@ def create_task(taskData: TaskCreate):
     return task
 #can do custom validation in pydantic and also has build in validations
 #can also convert to and from json easily
+@app.put("/tasks/{id}")
+def update_task(id: int, taskData: TaskUpdate):
+    task= next((t for t in tasks if t.id == id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task{id} not found")
+    task.title = taskData.title
+    task.done = taskData.done
+    return task
+@app.delete("/tasks/{id}")
+def delete_task(id: int):
+    task= next((t for t in tasks if t.id == id), None)
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task{id} not found")
+    tasks.remove(task)
