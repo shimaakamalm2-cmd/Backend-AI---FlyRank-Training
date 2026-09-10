@@ -32,11 +32,11 @@ def read_tasks():
     return tasks
 
 
-#f means formatted string so its not took as literal string
+#f means formatted string so it's not took as literal string
 @app.get("/tasks/{id}")
 def read_task(id: int):
     task= next((t for t in tasks if t.id == id), None)
-
+    # or next_id= len(tasks) +1
     if not task:
         raise HTTPException(status_code=404, detail=f"Task{id} not found")
     return task
