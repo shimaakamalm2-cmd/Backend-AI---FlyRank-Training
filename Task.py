@@ -1,29 +1,49 @@
 from ast import List
 
-
-from fastapi import FastAPI , HTTPException
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
 app = FastAPI()
+
 
 class Task(BaseModel):
     id: int
     title: str
     done: bool
 
+class TaskCreate(BaseModel):
+    title: str
+
+
 # in memory or hardcode examples and outside of the class
-tasks: list[Task]= [
-        Task(id=1, title="Buy groceries", done=False),
-        Task(id=2, title="Walk the dog", done=True),
-        Task(id=3, title="Finish backend stage 2", done=False),
-    ]
+tasks: list[Task] = [
+    Task(id=1, title="Buy groceries", done=False),
+    Task(id=2, title="Walk the dog", done=True),
+    Task(id=3, title="Finish backend stage 2", done=False),
+]
+
 
 @app.get("/tasks")
 def read_tasks():
     return tasks
-#f means formatted string so its not took as literal string 
+
+
+#f means formatted string so its not took as literal string
 @app.get("/tasks/{id}")
 def read_task(id: int):
-    if id not in tasks:
-        raise HTTPException(status_code=404, detail=f"Task {id} not found")
-    return tasks[id]
+    task= next((t for t in tasks if t.id == id), None)
 
+    if not task:
+        raise HTTPException(status_code=404, detail=f"Task{id} not found")
+    return task
+
+@app.post("/tasks")
+def create_task(taskData: TaskCreate):
+    if not taskData.title:
+        raise HTTPException(status_code=400, detail="Task title cannot be blank")
+    next_id = len(tasks)+1
+    task =Task(id=next_id, title=taskData.title , done=False)
+    tasks.append(task)
+    return task
+#can do custom validation in pydantic and also has build in validations
+#can also convert to and from json easily
