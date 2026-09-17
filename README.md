@@ -13,13 +13,15 @@ A simple RESTful CRUD API for managing to-do list tasks built using **Python**, 
 
 **API endpoints**
 
-| Method | Endpoint    |
-|--------|-------------|
-| GET    | /tasks      |
-| POST   | /tasks      |
-| GET    | /tasks/{id} |
-| PUT    | /tasks/{id} |
-| DELETE | /tasks/{id} |
+| Method | Endpoint     |
+|--------|--------------|
+| GET    | /tasks       |
+| POST   | /tasks       |
+| GET    | /tasks/{id}  |
+| PUT    | /tasks/{id}  |
+| GET    | /tasksStatus |
+| DELETE | /tasks/{id}  |
+| GET    | /tasksSearch | 
 
 **pasted curl -i request**
 

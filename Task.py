@@ -1,4 +1,5 @@
 from ast import List
+from unittest import skip
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -65,3 +66,18 @@ def delete_task(id: int):
     if not task:
         raise HTTPException(status_code=404, detail=f"Task{id} not found")
     tasks.remove(task)
+
+@app.get("/tasksStatus")
+def list_tasks(done: bool):
+        return [task for task in tasks if task.done == done]
+
+@app.get("/tasksSearch")
+def list_tasks_search(title: str):
+    return [task for task in tasks if task.title == title]
+# curl -i "http://127.0.0.1:8000/tasksSearch?title="feed the cats""
+#curl -i "http://127.0.0.1:8000/tasksSearch?title=Buy%20groceries"
+
+
+
+
+
