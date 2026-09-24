@@ -1,83 +1,60 @@
-from ast import List
-from unittest import skip
 
+import sqlite3
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from starlette import status
 
 app = FastAPI()
 
+conn = sqlite3.connect("tasks.db")
+cursor = conn.cursor()
+
+#can not make a global connection , connection per request
+# cause thread crash cuz fastapi handles requests using multithreading
+
+#function for requesting connection
+def connect_db():
+    conn = sqlite3.connect("tasks.db")
+    # Allows accessing columns by name like dicts: row["title"]
+    #also fastapi seializes data into json , and dictionaries map directly to json
+    conn.row_factory = sqlite3.Row
+    return conn
 
 class Task(BaseModel):
     id: int
     title: str
     done: bool
 
+
 class TaskCreate(BaseModel):
     title: str
+
 
 class TaskUpdate(BaseModel):
     title: str
     done: bool
 
 
-# in memory or hardcode examples and outside of the class
-tasks: list[Task] = [
-    Task(id=1, title="Buy groceries", done=False),
-    Task(id=2, title="Walk the dog", done=True),
-    Task(id=3, title="Finish backend stage 2", done=False),
-]
+
 
 
 @app.get("/tasks")
 def read_tasks():
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, title, done FROM tasks")
+    tasks = cursor.fetchall()
     return tasks
 
-
-#f means formatted string so it's not took as literal string
 @app.get("/tasks/{id}")
 def read_task(id: int):
-    task= next((t for t in tasks if t.id == id), None)
-    # or next_id= len(tasks) +1
-    if not task:
-        raise HTTPException(status_code=404, detail=f"Task{id} not found")
+    conn = connect_db()
+    cursor = conn.cursor()
+    task = cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,))
+    task = cursor.fetchone()  # fetch one row where id matches
+    conn.close()
+    if task is None:
+        raise HTTPException(status_code=404, detail={"error": "Task not found"})
+
     return task
-
-@app.post("/tasks")
-def create_task(taskData: TaskCreate):
-    if not taskData.title:
-        raise HTTPException(status_code=400, detail="Task title cannot be blank")
-    next_id = len(tasks)+1
-    task =Task(id=next_id, title=taskData.title , done=False)
-    tasks.append(task)
-    return task
-#can do custom validation in pydantic and also has build in validations
-#can also convert to and from json easily
-@app.put("/tasks/{id}")
-def update_task(id: int, taskData: TaskUpdate):
-    task= next((t for t in tasks if t.id == id), None)
-    if not task:
-        raise HTTPException(status_code=404, detail=f"Task{id} not found")
-    task.title = taskData.title
-    task.done = taskData.done
-    return task
-@app.delete("/tasks/{id}")
-def delete_task(id: int):
-    task= next((t for t in tasks if t.id == id), None)
-    if not task:
-        raise HTTPException(status_code=404, detail=f"Task{id} not found")
-    tasks.remove(task)
-
-@app.get("/tasksStatus")
-def list_tasks(done: bool):
-        return [task for task in tasks if task.done == done]
-
-@app.get("/tasksSearch")
-def list_tasks_search(title: str):
-    return [task for task in tasks if task.title == title]
-# curl -i "http://127.0.0.1:8000/tasksSearch?title="feed the cats""
-#curl -i "http://127.0.0.1:8000/tasksSearch?title=Buy%20groceries"
-
-
-
-
 

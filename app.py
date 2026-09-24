@@ -17,6 +17,8 @@ cursor.execute("SELECT COUNT(*) FROM tasks")
 
 # 3. Fetch the first column of the first row (the actual integer count) a tuple
 count = cursor.fetchone()[0]
+tup = ()
+title = ''
 
 # 4. Check if empty and insert initial tasks
 if count == 0:
@@ -26,5 +28,12 @@ if count == 0:
 
     # Commit the changes to permanently save them to the tasks.db file
     conn.commit()
+
+cursor.execute("SELECT title FROM tasks")
+rows = cursor.fetchall() # fetch all rows in the DB
+for row in rows:
+    title = row[0]
+    print(title)
+
 
 conn.close()
