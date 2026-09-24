@@ -58,3 +58,12 @@ def read_task(id: int):
 
     return task
 
+@app.post("/tasks")
+def create_task(task: TaskCreate):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO tasks (title) VALUES (?)" , (task.title,))
+    conn.commit()
+    conn.close()
+
+
