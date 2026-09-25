@@ -2,14 +2,36 @@
 
 A simple RESTful CRUD API for managing to-do list tasks built using **Python**, **FastAPI**, and **Pydantic**.
 
-**How to install and run:**
+## How to Run the Project
 
-1. Activate virtual environment by : source .venv/bin/activate
-2. install dependencies: pip install fastapi uvicorn pydantic
-3. start the server 
-- for health status and root endpoint: uvicorn main:app --reload 
-- for all CRUD operations : uvicorn Task:app --reload 
-4. Access Swagger UI by :http://127.0.0.1:8000/docs
+1. **Clone the repository:**
+   ```bash
+   git clone <your-repository-url>
+   cd <your-repository-folder>
+   ```
+
+2. **Create and activate a virtual environment:**
+   ```bash
+   python -m venv venv
+   # On Windows:
+   venv\Scripts\activate
+   # On macOS/Linux:
+   source venv/bin/activate
+   ```
+
+3. **Install dependencies:**
+   ```bash
+   pip install fastapi uvicorn pydantic
+   ```
+
+4. **Start the server:**
+   ```bash
+   uvicorn main:app --reload
+   ```
+   > **Note:** Running the app automatically creates the SQLite database file (`tasks.db`) and initializes the `tasks` table if it does not already exist.
+
+5. **Access Interactive API Docs:**
+   Open your browser to `http://127.0.0.1:8000/docs` to test endpoints via Swagger UI.
 
 **API endpoints**
 
@@ -18,10 +40,9 @@ A simple RESTful CRUD API for managing to-do list tasks built using **Python**, 
 | GET    | /tasks       |
 | POST   | /tasks       |
 | GET    | /tasks/{id}  |
-| PUT    | /tasks/{id}  |
+| PATCH  | /tasks/{id}  |
 | GET    | /tasksStatus |
 | DELETE | /tasks/{id}  |
-| GET    | /tasksSearch | 
 
 **pasted curl -i request**
 
@@ -40,3 +61,14 @@ content-type: application/json
 **SWAGGER UI:**
 
 ![Swagger UI Screenshot](swaggerUI.png)
+
+## Database Choice & Storage
+
+* **Why SQLite?** 
+  it is serverless, zero-configuration, and stores data in a single file.
+
+* **Database Storage:**
+  The database file (`tasks.db`) is generated programmatically in the root directory of the project when the application initializes.
+
+* **Database Viewer:**
+![img.png](DB.png)
