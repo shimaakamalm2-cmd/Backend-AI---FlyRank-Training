@@ -67,3 +67,40 @@ def create_task(task: TaskCreate):
     conn.close()
 
 
+@app.patch("/tasks/{id}")
+def update_task(id: int, task: TaskUpdate):
+    conn = connect_db()
+    cursor = conn.cursor()
+    if not cursor.execute("SELECT * FROM tasks WHERE id = ?", (id,)):
+        conn.close()
+        raise HTTPException(status_code=404, detail={"error": "Task not found"})
+
+    #model dmp makes it a dict and the condition updates only the data sent in req
+    update_task = task.model_dump(exclude_unset=True)
+
+    # skip if used executed an empty update
+    if update_task is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail={"error": "no data to update"})
+
+    #dynamic query clause to specify the chosen keys
+    set_clause = " ,".join([f"{col} = ?" for col in update_task.keys()])
+    # get the values of the keys to add them to the clause
+    values = list(update_task.values())
+
+    #executing the update clause with the dynamic query
+    cursor.execute(f"UPDATE tasks SET {set_clause} WHERE id = {id}", values)
+    conn.commit()
+    conn.close()
+
+@app.delete("/tasks/{id}")
+def delete_task(id: int):
+    conn = connect_db()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM tasks WHERE id = ?", (id,))
+    conn.commit()
+    conn.close()
+
+
+
+
